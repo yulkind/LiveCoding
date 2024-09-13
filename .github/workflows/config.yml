@@ -12,10 +12,13 @@ jobs:
       - name: Set up Docker
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker.io
-          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version # Для проверки установки
+          sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-compose
+          docker --version
+          docker-compose --version
 
       - name: Run UI-tests via docker-compose
         env:
@@ -26,7 +29,7 @@ jobs:
 
       - name: Generate Allure report
         run: |
-          sudo docker-compose run regression /bin/sh -c "allure generate allure-results --clean -o allure-report"
+          docker-compose run regression /bin/sh -c "allure generate allure-results --clean -o allure-report"
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
